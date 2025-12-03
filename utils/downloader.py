@@ -62,9 +62,18 @@ async def download_file(url, id, path, filename, singleThreaded):
 
         logger.info(f"File downloaded to {downloader.output_path}")
 
+        # 🔥 CRITICAL FIX: Use actual downloaded filename if no filename provided
+        final_filename = filename
+        if not final_filename or final_filename.strip() == "":
+            # Extract filename from the downloaded file path
+            final_filename = Path(downloader.output_path).name
+            logger.info(f"No filename provided, using: {final_filename}")
+        
+        logger.info(f"Starting upload with filename: {final_filename}")
+
         asyncio.create_task(
             start_file_uploader(
-                downloader.output_path, id, path, filename, downloader.total_size
+                downloader.output_path, id, path, final_filename, downloader.total_size
             )
         )
     except Exception as e:
