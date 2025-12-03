@@ -264,24 +264,28 @@ async def startFileDownloadFromUrl(request: Request):
     try:
         id = getRandomID()
         
-        # --- FILENAME FIX ---
-        # If filename from frontend is empty/missing, set to None to trigger Auto-Detect
+        # --- IMPROVED FILENAME HANDLING ---
         filename = data.get("filename")
+        
+        # If frontend didn't extract filename, let backend handle it
         if not filename or filename.strip() == "":
-            filename = None 
-        # --------------------
-
+            logger.info(f"No filename provided by frontend for URL: {data['url']}")
+            filename = None  # Backend will auto-detect from download
+        else:
+            logger.info(f"Using frontend-provided filename: {filename}")
+        
         asyncio.create_task(
             download_file(
                 data["url"], 
                 id, 
                 data["path"], 
-                filename, 
+                filename,  # Can be None - backend will handle
                 data.get("singleThreaded", False)
             )
         )
         return JSONResponse({"status": "ok", "id": id})
     except Exception as e:
+        logger.error(f"Error starting remote upload: {e}")
         return JSONResponse({"status": str(e)})
 
 
