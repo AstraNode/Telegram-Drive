@@ -23,7 +23,7 @@ STORAGE_CHANNEL = int(os.getenv("STORAGE_CHANNEL", "-1003402540259"))  # Your st
 
 # Message ID of a file in the storage channel used for storing database backups
 DATABASE_BACKUP_MSG_ID = int(
-    os.getenv("DATABASE_BACKUP_MSG_ID")
+    os.getenv("DATABASE_BACKUP_MSG_ID", "33")
 )  # Message ID for database backup
 
 # Password used to access the website's admin panel
@@ -45,7 +45,7 @@ DATABASE_BACKUP_TIME = int(
 SLEEP_THRESHOLD = int(os.getenv("SLEEP_THRESHOLD", 60))  # Default to 60 seconds
 
 # Domain to auto-ping and keep the website active
-WEBSITE_URL = os.getenv("WEBSITE_URL", None)
+WEBSITE_URL = os.getenv("WEBSITE_URL", "https://inc-calla-nbhi763-7e58a367.koyeb.app")
 
 
 # For Using TG Drive's Bot Mode
