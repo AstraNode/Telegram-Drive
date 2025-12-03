@@ -9,7 +9,7 @@ API_ID = int(os.getenv("API_ID", 22884130))  # Your Telegram API ID
 API_HASH = os.getenv("API_HASH", "a69e8b16dac958f1bd31eee360ec53fa")  # Your Telegram API Hash
 
 # List of Telegram bot tokens used for file upload/download operations
-BOT_TOKENS = os.getenv("BOT_TOKENS", "8203126938:AAFikj0DM2N0YvZM1muJl7G2Rd1YFGwHRSw").strip(", ").split(",")
+BOT_TOKENS = os.getenv("BOT_TOKENS", "8365534612:AAG1RGPfiAwRLn6rmVdXTc6KfQIUkHEVdig").strip(", ").split(",")
 BOT_TOKENS = [token.strip() for token in BOT_TOKENS if token.strip() != ""]
 
 # List of Premium Telegram Account Pyrogram String Sessions used for file upload/download operations
@@ -19,11 +19,11 @@ STRING_SESSIONS = [
 ]
 
 # Chat ID of the Telegram storage channel where files will be stored
-STORAGE_CHANNEL = int(os.getenv("STORAGE_CHANNEL", "-1003402540259"))  # Your storage channel's chat ID
+STORAGE_CHANNEL = int(os.getenv("STORAGE_CHANNEL", "-1003454207324"))  # Your storage channel's chat ID
 
 # Message ID of a file in the storage channel used for storing database backups
 DATABASE_BACKUP_MSG_ID = int(
-    os.getenv("DATABASE_BACKUP_MSG_ID", "33")
+    os.getenv("DATABASE_BACKUP_MSG_ID", "2")
 )  # Message ID for database backup
 
 # Password used to access the website's admin panel
@@ -51,7 +51,7 @@ WEBSITE_URL = os.getenv("WEBSITE_URL", "https://inc-calla-nbhi763-7e58a367.koyeb
 # For Using TG Drive's Bot Mode
 
 # Main Bot Token for TG Drive's Bot Mode
-MAIN_BOT_TOKEN = os.getenv("MAIN_BOT_TOKEN", "8203126938:AAFikj0DM2N0YvZM1muJl7G2Rd1YFGwHRSw")
+MAIN_BOT_TOKEN = os.getenv("MAIN_BOT_TOKEN", "8365534612:AAG1RGPfiAwRLn6rmVdXTc6KfQIUkHEVdig")
 if MAIN_BOT_TOKEN.strip() == "":
     MAIN_BOT_TOKEN = None
 
