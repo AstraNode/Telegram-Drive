@@ -1,3 +1,5 @@
+# --- START OF FILE TGDrive-main/main.py ---
+
 from utils.downloader import (
     download_file,
     get_file_info_from_url,
@@ -7,7 +9,8 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 import aiofiles
 from fastapi import FastAPI, HTTPException, Request, File, UploadFile, Form, Response
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from config import ADMIN_PASSWORD, MAX_FILE_SIZE, STORAGE_CHANNEL
 from utils.clients import initialize_clients
 from utils.directoryHandler import getRandomID
@@ -17,65 +20,59 @@ from utils.uploader import start_file_uploader
 from utils.logger import Logger
 import urllib.parse
 
-
-# Startup Event
+# Startup Event: Handles initialization when server starts
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Reset the cache directory, delete cache files
+    # Reset the cache directory, delete old cache files
     reset_cache_dir()
 
-    # Initialize the clients
+    # Initialize the Telegram clients
     await initialize_clients()
 
-    # Start the website auto ping task
+    # Start the website auto ping task to keep server awake
     asyncio.create_task(auto_ping_website())
 
     yield
 
-
 app = FastAPI(docs_url=None, redoc_url=None, lifespan=lifespan)
 logger = Logger(__name__)
 
+# --- CORS CONFIGURATION ---
+# This allows your Vercel Frontend to communicate with this Backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins. Safe for personal use.
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
+# --- CORE ROUTES ---
 
 @app.get("/")
-async def home_page():
-    return FileResponse("website/home.html")
-
-
-@app.get("/stream")
-async def home_page():
-    return FileResponse("website/VideoPlayer.html")
-
-
-@app.get("/static/{file_path:path}")
-async def static_files(file_path):
-    if "apiHandler.js" in file_path:
-        with open(Path("website/static/js/apiHandler.js")) as f:
-            content = f.read()
-            content = content.replace("MAX_FILE_SIZE__SDGJDG", str(MAX_FILE_SIZE))
-        return Response(content=content, media_type="application/javascript")
-    return FileResponse(f"website/static/{file_path}")
-
+async def health_check():
+    """Simple endpoint to check if backend is running"""
+    return JSONResponse({"status": "Online", "service": "TGDrive-Backend"})
 
 @app.get("/file")
 async def dl_file(request: Request):
+    """Handles file streaming (Video/Download)"""
     from utils.directoryHandler import DRIVE_DATA
+    try:
+        path = request.query_params["path"]
+        file = DRIVE_DATA.get_file(path)
+        return await media_streamer(STORAGE_CHANNEL, file.file_id, file.name, request)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=404)
 
-    path = request.query_params["path"]
-    file = DRIVE_DATA.get_file(path)
-    return await media_streamer(STORAGE_CHANNEL, file.file_id, file.name, request)
-
-
-# Api Routes
-
+# --- API ROUTES (Called by Frontend) ---
 
 @app.post("/api/checkPassword")
 async def check_password(request: Request):
     data = await request.json()
-    if data["pass"] == ADMIN_PASSWORD:
+    if data.get("pass") == ADMIN_PASSWORD:
         return JSONResponse({"status": "ok"})
     return JSONResponse({"status": "Invalid password"})
-
 
 @app.post("/api/createNewFolder")
 async def api_new_folder(request: Request):
@@ -83,7 +80,7 @@ async def api_new_folder(request: Request):
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"createNewFolder {data}")
@@ -101,14 +98,13 @@ async def api_new_folder(request: Request):
     DRIVE_DATA.new_folder(data["path"], data["name"])
     return JSONResponse({"status": "ok"})
 
-
 @app.post("/api/getDirectory")
 async def api_get_directory(request: Request):
     from utils.directoryHandler import DRIVE_DATA
 
     data = await request.json()
 
-    if data["password"] == ADMIN_PASSWORD:
+    if data.get("password") == ADMIN_PASSWORD:
         is_admin = True
     else:
         is_admin = False
@@ -123,11 +119,8 @@ async def api_get_directory(request: Request):
 
     elif "/search_" in data["path"]:
         query = urllib.parse.unquote(data["path"].split("_", 1)[1])
-        print(query)
         data = {"contents": DRIVE_DATA.search_file_folder(query)}
-        print(data)
         folder_data = convert_class_to_dict(data, isObject=False, showtrash=False)
-        print(folder_data)
 
     elif "/share_" in data["path"]:
         path = data["path"].split("_", 1)[1]
@@ -143,9 +136,7 @@ async def api_get_directory(request: Request):
         folder_data = convert_class_to_dict(folder_data, isObject=True, showtrash=False)
     return JSONResponse({"status": "ok", "data": folder_data, "auth_home_path": None})
 
-
 SAVE_PROGRESS = {}
-
 
 @app.post("/api/upload")
 async def upload_file(
@@ -192,14 +183,13 @@ async def upload_file(
 
     return JSONResponse({"id": id, "status": "ok"})
 
-
 @app.post("/api/getSaveProgress")
 async def get_save_progress(request: Request):
     global SAVE_PROGRESS
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"getUploadProgress {data}")
@@ -209,14 +199,13 @@ async def get_save_progress(request: Request):
     except:
         return JSONResponse({"status": "not found"})
 
-
 @app.post("/api/getUploadProgress")
 async def get_upload_progress(request: Request):
     from utils.uploader import PROGRESS_CACHE
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"getUploadProgress {data}")
@@ -227,7 +216,6 @@ async def get_upload_progress(request: Request):
     except:
         return JSONResponse({"status": "not found"})
 
-
 @app.post("/api/cancelUpload")
 async def cancel_upload(request: Request):
     from utils.uploader import STOP_TRANSMISSION
@@ -235,7 +223,7 @@ async def cancel_upload(request: Request):
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"cancelUpload {data}")
@@ -243,20 +231,18 @@ async def cancel_upload(request: Request):
     STOP_DOWNLOAD.append(data["id"])
     return JSONResponse({"status": "ok"})
 
-
 @app.post("/api/renameFileFolder")
 async def rename_file_folder(request: Request):
     from utils.directoryHandler import DRIVE_DATA
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"renameFileFolder {data}")
     DRIVE_DATA.rename_file_folder(data["path"], data["name"])
     return JSONResponse({"status": "ok"})
-
 
 @app.post("/api/trashFileFolder")
 async def trash_file_folder(request: Request):
@@ -264,13 +250,12 @@ async def trash_file_folder(request: Request):
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"trashFileFolder {data}")
     DRIVE_DATA.trash_file_folder(data["path"], data["trash"])
     return JSONResponse({"status": "ok"})
-
 
 @app.post("/api/deleteFileFolder")
 async def delete_file_folder(request: Request):
@@ -278,20 +263,18 @@ async def delete_file_folder(request: Request):
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"deleteFileFolder {data}")
     DRIVE_DATA.delete_file_folder(data["path"])
     return JSONResponse({"status": "ok"})
 
-
 @app.post("/api/getFileInfoFromUrl")
 async def getFileInfoFromUrl(request: Request):
-
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"getFileInfoFromUrl {data}")
@@ -301,24 +284,22 @@ async def getFileInfoFromUrl(request: Request):
     except Exception as e:
         return JSONResponse({"status": str(e)})
 
-
 @app.post("/api/startFileDownloadFromUrl")
 async def startFileDownloadFromUrl(request: Request):
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"startFileDownloadFromUrl {data}")
     try:
         id = getRandomID()
         asyncio.create_task(
-            download_file(data["url"], id, data["path"], data["filename"], data["singleThreaded"])
+            download_file(data["url"], id, data["path"], data["filename"], data.get("singleThreaded", False))
         )
         return JSONResponse({"status": "ok", "id": id})
     except Exception as e:
         return JSONResponse({"status": str(e)})
-
 
 @app.post("/api/getFileDownloadProgress")
 async def getFileDownloadProgress(request: Request):
@@ -326,7 +307,7 @@ async def getFileDownloadProgress(request: Request):
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"getFileDownloadProgress {data}")
@@ -337,14 +318,13 @@ async def getFileDownloadProgress(request: Request):
     except:
         return JSONResponse({"status": "not found"})
 
-
 @app.post("/api/getFolderShareAuth")
 async def getFolderShareAuth(request: Request):
     from utils.directoryHandler import DRIVE_DATA
 
     data = await request.json()
 
-    if data["password"] != ADMIN_PASSWORD:
+    if data.get("password") != ADMIN_PASSWORD:
         return JSONResponse({"status": "Invalid password"})
 
     logger.info(f"getFolderShareAuth {data}")
