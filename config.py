@@ -5,11 +5,11 @@ import os
 load_dotenv()
 
 # Telegram API credentials obtained from https://my.telegram.org/auth
-API_ID = int(os.getenv("API_ID", 22884130))  # Your Telegram API ID
-API_HASH = os.getenv("API_HASH", "a69e8b16dac958f1bd31eee360ec53fa")  # Your Telegram API Hash
+API_ID = int(os.getenv("API_ID", ))  # Your Telegram API ID
+API_HASH = os.getenv("API_HASH", "")  # Your Telegram API Hash
 
 # List of Telegram bot tokens used for file upload/download operations
-BOT_TOKENS = os.getenv("BOT_TOKENS", "8365534612:AAG1RGPfiAwRLn6rmVdXTc6KfQIUkHEVdig").strip(", ").split(",")
+BOT_TOKENS = os.getenv("BOT_TOKENS", "").strip(", ").split(",")
 BOT_TOKENS = [token.strip() for token in BOT_TOKENS if token.strip() != ""]
 
 # List of Premium Telegram Account Pyrogram String Sessions used for file upload/download operations
@@ -19,7 +19,7 @@ STRING_SESSIONS = [
 ]
 
 # Chat ID of the Telegram storage channel where files will be stored
-STORAGE_CHANNEL = int(os.getenv("STORAGE_CHANNEL", "-1003454207324"))  # Your storage channel's chat ID
+STORAGE_CHANNEL = int(os.getenv("STORAGE_CHANNEL", ""))  # Your storage channel's chat ID
 
 # Message ID of a file in the storage channel used for storing database backups
 DATABASE_BACKUP_MSG_ID = int(
@@ -45,16 +45,16 @@ DATABASE_BACKUP_TIME = int(
 SLEEP_THRESHOLD = int(os.getenv("SLEEP_THRESHOLD", 60))  # Default to 60 seconds
 
 # Domain to auto-ping and keep the website active
-WEBSITE_URL = os.getenv("WEBSITE_URL", "https://inc-calla-nbhi763-7e58a367.koyeb.app")
+WEBSITE_URL = os.getenv("WEBSITE_URL", "")
 
 
 # For Using TG Drive's Bot Mode
 
 # Main Bot Token for TG Drive's Bot Mode
-MAIN_BOT_TOKEN = os.getenv("MAIN_BOT_TOKEN", "8365534612:AAG1RGPfiAwRLn6rmVdXTc6KfQIUkHEVdig")
+MAIN_BOT_TOKEN = os.getenv("MAIN_BOT_TOKEN", "")
 if MAIN_BOT_TOKEN.strip() == "":
     MAIN_BOT_TOKEN = None
 
 # List of Telegram User IDs who have admin access to the bot mode
-TELEGRAM_ADMIN_IDS = os.getenv("TELEGRAM_ADMIN_IDS", "8304839512").strip(", ").split(",")
+TELEGRAM_ADMIN_IDS = os.getenv("TELEGRAM_ADMIN_IDS", "").strip(", ").split(",")
 TELEGRAM_ADMIN_IDS = [int(id) for id in TELEGRAM_ADMIN_IDS if id.strip() != ""]
