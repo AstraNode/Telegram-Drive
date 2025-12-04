@@ -1,8 +1,8 @@
-# TGDrive - A Google Drive Clone with Telegram Storage
+# Telegram Drive - A Simple but Awesome File Storage with UNLIMITED STORAGE which uses Telegram as Backend 
 
 Welcome to TGDrive! This web application replicates Google Drive's functionalities using Telegram as its storage backend. Manage folders and files, perform actions like uploading, renaming, and deleting, utilize trash/bin support, enable permanent deletion, and share public links. The application offers admin login and automatically backs up the database to Telegram.
 
-**Check out the [TGDrive Personal](https://github.com/TechShreyash/TGDrivePersonal) project for local desktop backup support.**
+**Check out the [TGDrive Frontend](https://github.com/AstraNode/TGDrive-Frontend) for frontend website**
 
 ## Features
 
@@ -116,11 +116,15 @@ Access the application at `http://127.0.0.1:8000` or `http://your_ip:8000`.
 
 <div align="center">
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/TechShreyash/TGDrive)
+[![Deploy to Render](https://render.com)
 
 </div>
 
-> **Note:** After updating the TG Drive code, clear your browser's cache to ensure the latest JavaScript files are loaded and run correctly.
+> **Note:** After updating the Telegram Drive code, clear your browser's cache to ensure the latest JavaScript files are loaded and run correctly.
+
+## Deploy Frontend 
+
+For frontend repo redirect to [TGDrive Frontend](https://github.com/AstraNode/TGDrive-Frontend) deploy it on vercel
 
 ## TG Drive's Bot Mode
 
@@ -148,15 +152,6 @@ Bot Mode - Youtube Video Tutorial : https://youtu.be/XSeY2XcHdGI
 
 1. Send the `/set_folder` command and follow the instructions provided by the bot.
 
-## Important Posts Regarding TG Drive
-
-Stay informed by joining our updates channel on Telegram: [@TechZBots](https://telegram.me/TechZBots). We post updates, guides, and tips about TG Drive there.
-
-- https://telegram.me/TechZBots/891
-- https://telegram.me/TechZBots/876
-- https://telegram.me/TechZBots/874
-- https://telegram.me/TechZBots/870
-
 ## Contributing
 
 Contributions are welcome! Fork the repository, make your changes, and create a pull request.
@@ -167,4 +162,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Support
 
-For inquiries or support, join our [Telegram Support Group](https://telegram.me/TechZBots_Support) or email [techshreyash123@gmail.com](mailto:techshreyash123@gmail.com).
+For inquiries or support, join our [Telegram Support Group]() or email [abcd@gmail.com](mailto:abcd@gmail.com).
+
+
