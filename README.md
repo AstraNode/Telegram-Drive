@@ -160,8 +160,11 @@ Contributions are welcome! Fork the repository, make your changes, and create a 
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Support
+## Developer 
 
-For inquiries or support, join our [Telegram Support Group]() or email [abcd@gmail.com](mailto:abcd@gmail.com).
+**>Base Repo by [TechShreyash](https://github.com/TechShreyash)**
+**>Frontend Feature by [AstraNode](https://github.com/AstraNode)**
+
+
 
 
