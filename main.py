@@ -1,5 +1,3 @@
-# --- START OF FILE TGDrive-main/main.py ---
-
 from utils.downloader import download_file, get_file_info_from_url
 import asyncio
 from pathlib import Path
@@ -17,18 +15,13 @@ from utils.uploader import start_file_uploader
 from utils.logger import Logger
 import urllib.parse
 
-# --- LIFESPAN MANAGER ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Reset cache
     reset_cache_dir()
-    # Initialize Telegram Clients
     await initialize_clients()
-    # Start Auto-Ping
     asyncio.create_task(auto_ping_website())
     yield
-
-# --- APP DEFINITION ---
+    
 app = FastAPI(docs_url=None, redoc_url=None, lifespan=lifespan)
 logger = Logger(__name__)
 
