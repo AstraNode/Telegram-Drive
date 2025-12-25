@@ -16,8 +16,6 @@ You can use this bot to upload files to your TG Drive website directly instead o
 /current_folder - Check current folder
 
 📤 **How To Upload Files:** Send a file to this bot and it will be uploaded to your TG Drive website. You can also set a folder for file uploads using /set_folder command.
-
-Read more about [TG Drive's Bot Mode](https://github.com/TechShreyash/TGDrive#tg-drives-bot-mode)
 """
 
 SET_FOLDER_PATH_CACHE = {}  # Cache to store folder path for each folder id
@@ -142,7 +140,6 @@ async def current_folder_handler(client: Client, message: Message):
     await message.reply_text(f"Current Folder: {BOT_MODE.current_folder_name}")
 
 
-# Handling when any file is sent to the bot
 @main_bot.on_message(
     filters.private
     & filters.user(config.TELEGRAM_ADMIN_IDS)
@@ -172,13 +169,70 @@ async def file_handler(client: Client, message: Message):
         copied_message.id,
         file.file_size,
     )
+    
+    if BOT_MODE.current_folder == "/":
+        directory_folder = DRIVE_DATA.contents["/"]
+    else:
+        paths = BOT_MODE.current_folder.strip("/").split("/")
+        directory_folder = DRIVE_DATA.contents["/"]
+        for path in paths:
+            directory_folder = directory_folder.contents[path]
+            
+    file_obj = None
+    for item_id, item in directory_folder.contents.items():
+        if hasattr(item, 'file_id') and item.file_id == copied_message.id:
+            file_obj = item
+            break
+    
+    if not file_obj:
+        logger.error("Failed to find created file object")
+        await message.reply_text("❌ Error: Failed to upload file")
+        return
+    
+    website_url = config.WEBSITE_URL.rstrip('/')
+    
+    file_path = f"{BOT_MODE.current_folder}/{file_obj.id}".replace('//', '/')
+    
+    download_link = f"{website_url}/file?path={file_path}"
+    
+    file_name_lower = (file.file_name or "file").lower()
+    is_video = any(file_name_lower.endswith(ext) for ext in ['.mp4', '.mkv', '.webm', '.mov', '.avi', '.ts', '.ogv'])
+    
+    file_size_mb = file.file_size / (1024 * 1024)
+    if file_size_mb >= 1024:
+        size_str = f"{file_size_mb / 1024:.2f} GB"
+    else:
+        size_str = f"{file_size_mb:.2f} MB"
+    
+    response_text = f"✨ **Yᴏᴜʀ Lɪɴᴋs ᴀʀᴇ Rᴇᴀᴅʏ!** ✨\n\n"
+    
+    response_text += f"> **{file.file_name}**\n\n"
+    
+    response_text += f"📁 **Fɪʟᴇ Sɪᴢᴇ:** {size_str}\n\n"
+    response_text += f"🚀 **Dᴏᴡɴʟᴏᴀᴅ Lɪɴᴋ:**\n{download_link}"
+
+    if is_video:
+        stream_link = f"{website_url}/stream?url={download_link}"
+        response_text += f"\n\n🖥️ **Sᴛʀᴇᴀᴍ Lɪɴᴋ:**\n{stream_link}"
+
+    response_text += f"\n\n⌛️ **Nᴏᴛᴇ: Lɪɴᴋs ʀᴇᴍᴀɪɴ ᴀᴄᴛɪᴠᴇ ᴡʜɪʟᴇ ᴛʜᴇ ʙᴏᴛ ɪs ʀᴜɴɴɪɴɢ ᴀɴᴅ ᴛʜᴇ ғɪʟᴇ ɪs ᴀᴄᴄᴇssɪʙʟᴇ.**"
+    
+    buttons = []
+    if is_video:
+        stream_link = f"{website_url}/stream?url={download_link}"
+        buttons.append([
+            InlineKeyboardButton("📺 STREAM", url=stream_link),
+            InlineKeyboardButton("🚀 DOWNLOAD", url=download_link)
+        ])
+    else:
+        buttons.append([
+            InlineKeyboardButton("🚀 DOWNLOAD", url=download_link)
+        ])
 
     await message.reply_text(
-        f"""✅ File Uploaded Successfully To Your TG Drive Website
-                             
-**File Name:** {file.file_name}
-**Folder:** {BOT_MODE.current_folder_name}
-"""
+        response_text,
+        reply_markup=InlineKeyboardMarkup(buttons) if buttons else None,
+        disable_web_page_preview=True
     )
 
 
