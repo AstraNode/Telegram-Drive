@@ -221,12 +221,12 @@ async def file_handler(client: Client, message: Message):
     if is_video:
         stream_link = f"{website_url}/stream?url={download_link}"
         buttons.append([
-            InlineKeyboardButton("📺 STREAM", url=stream_link),
-            InlineKeyboardButton("🚀 DOWNLOAD", url=download_link)
+            InlineKeyboardButton("📺 sᴛʀᴇᴀᴍ", url=stream_link),
+            InlineKeyboardButton("🚀 ᴅᴏᴡɴʟᴏᴀᴅ", url=download_link)
         ])
     else:
         buttons.append([
-            InlineKeyboardButton("🚀 DOWNLOAD", url=download_link)
+            InlineKeyboardButton("🚀 ᴅᴏᴡɴʟᴏᴀᴅ", url=download_link)
         ])
 
     await message.reply_text(
